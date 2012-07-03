@@ -757,11 +757,12 @@ function _send(jid, stanza, handler) {
     var replyObserver;
     if(handler)
         replyObserver = {
-            observe: function(replyStanza, topic, sessionName) {
+            observe: function(replyStanza, topic, sessionName) { //HM: 20120703, replyStanza is a jElement / json object.
                 handler({
                     account: sessionName,
-                    session: { name: sessionName }, // XXX hack
-                    stanza: dom2xml(replyStanza)
+                    session: { name: sessionName }, // XXX hack <- HM: by whom?
+                    stanza: replyStanza //hm
+                    //stanza: dom2xml(replyStanza) //original
                     });
             }
         };

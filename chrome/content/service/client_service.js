@@ -33,6 +33,7 @@ const ns_disco_info = 'http://jabber.org/protocol/disco#info';
 const ns_x4m_in = 'http://hyperstruct.net/xmpp4moz/protocol/internal';
 
 loader.loadSubScript('chrome://xmpp4moz/content/lib/misc.js');
+loader.loadSubScript('chrome://xmpp4moz/content/lib/jxon.js');
 load('chrome://xmpp4moz/content/lib/query.js', ['Query']);
 
 
@@ -333,7 +334,21 @@ function addObserver(observer, topic, ownsWeak) {
 function notifyObservers(subject, topic, data) {
     for each(var observer in observers) 
         try {
-            observer.observe(subject, topic, data);
+			//hm
+			var jSubject = JXON.build(subject);
+			
+			//appending subject.localName (iq, message, presence), because JXON omitted it.
+			if(subject){
+				try{
+					jSubject['@name'] = subject.localName;
+				}catch(e){
+					logToConsole('HM: notifyObservers Error. subject = '+ (subject));
+				}
+			}
+			
+			//hm end
+           // observer.observe(subject, topic, data); //original
+            observer.observe(jSubject, topic, data); //hm
         } catch(e) {
             Cu.reportError(e);
             LOG('Observer raised exception: unregistered.');

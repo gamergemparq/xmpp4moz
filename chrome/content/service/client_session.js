@@ -20,6 +20,8 @@
  *  
  */
 
+ loader.loadSubScript('chrome://xmpp4moz/content/lib/misc.js'); //hm
+ loader.loadSubScript('chrome://xmpp4moz/content/lib/jxon.js'); //hm
 
 // INITIALIZATION
 // ----------------------------------------------------------------------
@@ -73,7 +75,14 @@ function receive(element) {
     var id = element.getAttribute('id');
     if(this._pending[id])
         try {
-            this._pending[id].observe(element, 'reply-in', this.name);
+			//hm
+			var jElement = JXON.build(element);
+			//logToConsole('HM: JSON.stringify(jElement) = ' +JSON.stringify(jElement)); 
+			logToConsole('HM: this._pending[id].observe = ' +this._pending[id].observe); 
+			//hm end
+	
+            //this._pending[id].observe(element, 'reply-in', this.name); //original
+            this._pending[id].observe(jElement, 'reply-in', this.name);
         } catch(e) {
             Cu.reportError(e);
         } finally {

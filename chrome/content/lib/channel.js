@@ -65,7 +65,43 @@ Channel.prototype.receive = function(event) {
     }
 };
 
-Channel.prototype.observe = function(subject, topic, data) {
+//hm
+Channel.prototype.observe = function(jSubject, topic, data) {
+    var [_, name, info] = topic.match(/^(data|stanza|connector)-?(in|out|.*)?$/);
+    var account = data.toString();
+
+    var event = {
+        get account() {
+            return (this.stanza ?
+                    this.stanza.ns_x4m_in::meta.@account.toXMLString() :
+                    account);
+        },
+
+        get session() {
+            return { name: account };
+        }
+    };
+
+    switch(name) {
+    case 'connector':
+        event.state = info;
+        event.event = name;
+        if(jSubject instanceof Ci.nsIDOMElement)
+            event.info = dom2xml(jSubject.QueryInterface(Ci.nsIDOMElement));
+        break;
+    case 'stanza':
+		//original code expects an e4x object. Now it shall expects only json object.
+        event.stanza = jSubject; //json object
+        event.event = jSubject['@name']; // original: event.stanza.name();
+        event.direction = info;
+        break;
+    }
+
+    this.receive(event);
+};
+//hm end
+
+/* ORIGINAL_Channel.prototype.observe = function(subject, topic, data) {
     var [_, name, info] = topic.match(/^(data|stanza|connector)-?(in|out|.*)?$/);
     var account = data.toString();
 
@@ -96,7 +132,7 @@ Channel.prototype.observe = function(subject, topic, data) {
     }
 
     this.receive(event);
-};
+}; */
 
 Channel.prototype.release = function() {
     if(typeof(this.onRelease) == 'function')
